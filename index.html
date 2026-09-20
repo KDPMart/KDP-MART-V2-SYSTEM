@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>KDP Mart V2</title>
+
+  <style>
+    :root {
+      --top-safe: env(safe-area-inset-top, 0px);
+      --right-safe: env(safe-area-inset-right, 0px);
+      --bottom-safe: env(safe-area-inset-bottom, 0px);
+      --left-safe: env(safe-area-inset-left, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #f5f7f6;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app-shell {
+      position: fixed;
+      inset: 0;
+      padding:
+        var(--top-safe)
+        var(--right-safe)
+        var(--bottom-safe)
+        var(--left-safe);
+      background: #f5f7f6;
+    }
+
+    .app-frame {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+
+    .loading {
+      position: absolute;
+      inset:
+        var(--top-safe)
+        var(--right-safe)
+        var(--bottom-safe)
+        var(--left-safe);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f7f6;
+      transition: opacity .18s ease;
+    }
+
+    .loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-card {
+      width: min(310px, calc(100vw - 36px));
+      padding: 24px 20px;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 12px 35px rgba(20, 55, 39, .10);
+      text-align: center;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: #176b43;
+      margin-bottom: 7px;
+    }
+
+    .muted {
+      color: #68746e;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      margin: 18px auto 0;
+      border: 4px solid #e5ece8;
+      border-top-color: #198754;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .fallback {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .fallback.show {
+      display: block;
+    }
+
+    .open-button {
+      display: inline-block;
+      margin-top: 9px;
+      padding: 9px 14px;
+      border-radius: 9px;
+      background: #198754;
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <div class="loading" id="loading">
+
+      <div class="loading-card">
+
+        <div class="brand">
+          KDP Mart V2
+        </div>
+
+        <div class="muted">
+          Membuka aplikasi...
+        </div>
+
+        <div class="spinner"></div>
+
+        <div class="fallback" id="fallback">
+          <div class="muted">
+            Jika aplikasi tidak tampil, buka langsung:
+          </div>
+
+          <a
+            class="open-button"
+            id="directLink"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Buka KDP Mart V2
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <iframe
+      id="kdpFrame"
+      class="app-frame"
+      title="KDP Mart V2"
+      src="about:blank"
+      allow="clipboard-read; clipboard-write"
+      allowfullscreen
+    ></iframe>
+
+  </div>
+
+
+  <script>
+    // =========================================================
+    // GANTI URL INI SAJA
+    // Gunakan URL deployment Web App yang berakhir /exec
+    // JANGAN pakai URL /dev
+    // =========================================================
+
+    const KDP_MART_V2_URL =
+      "https://script.google.com/macros/s/AKfycbxknJFzb98PTD6LZ13gwtOH6fC_jiXnGf1EEmutOglMB7xvRIIsoLN8DCnUTIqXhyuVPQ/exec";
+
+
+    const frame =
+      document.getElementById("kdpFrame");
+
+    const loading =
+      document.getElementById("loading");
+
+    const fallback =
+      document.getElementById("fallback");
+
+    const directLink =
+      document.getElementById("directLink");
+
+
+    function validWebAppUrl(url) {
+      return (
+        typeof url === "string" &&
+        /^https:\/\/script\.google\.com\/.+\/exec(?:[?#].*)?$/i.test(url)
+      );
+    }
+
+
+    if (!validWebAppUrl(KDP_MART_V2_URL)) {
+
+      document.querySelector(".muted").textContent =
+        "URL Web App belum diisi.";
+
+      document.querySelector(".spinner").style.display =
+        "none";
+
+      fallback.classList.add("show");
+
+      directLink.style.display =
+        "none";
+
+    } else {
+
+      directLink.href =
+        KDP_MART_V2_URL;
+
+      frame.src =
+        KDP_MART_V2_URL;
+
+
+      frame.addEventListener(
+        "load",
+        function() {
+          setTimeout(
+            function() {
+              loading.classList.add(
+                "hidden"
+              );
+            },
+            120
+          );
+        }
+      );
+
+
+      // Jika koneksi / login lambat,
+      // tampilkan tombol buka langsung sebagai cadangan.
+      setTimeout(
+        function() {
+          if (
+            !loading.classList.contains(
+              "hidden"
+            )
+          ) {
+            fallback.classList.add(
+              "show"
+            );
+          }
+        },
+        8000
+      );
+    }
+  </script>
+
+</body>
+</html>
